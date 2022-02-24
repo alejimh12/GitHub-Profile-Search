@@ -4,9 +4,11 @@ const form = document.getElementById("form")
 // Obtener la barra de busqueda
 const search = document.getElementById("search")
 
+// Obtener widget del usuario
+const usercard = document.getElementById("usercard")
+
 
 // Escuchar evento submit del form
-
 form.addEventListener("submit", (evt) => {
     evt.preventDefault()
     const username = search.value
@@ -24,10 +26,10 @@ async function getUserData(username) {
         if (!userRequest.ok) {
             throw new Error(userRequest.status)
         }
-    
+
         const userData = await userRequest.json();
-        
-        
+
+
         if (userData.public_repos) {
             const reposRequets = await fetch(API + username + "/repos")
             const reposData = await reposRequets.json()
@@ -40,17 +42,39 @@ async function getUserData(username) {
         showError(error.message)
     }
 
-   
+
 
 }
 
 //Funcion para componer el HTML del widget
 function showUserData(userData) {
-    console.log(userData)
-}
+    let userContent = `
+    <img src="${userData.avatar_url}" alt="foto de perfil">
+    <h1>${userData.name}</h1>
+    <p>${userData.bio}</p>
+    <section class="data">
+        <ul>
+            <li>Followers: ${userData.followers}</li>
+            <li>Following: ${userData.following}</li>
+            <li>Repos: ${userData.public_repos}</li>
+        </ul>
+    </section>`
 
+    if (userData.repos) {
+        userContent += `<section class="repos">`
+        userData.repos.slice(0, 7).forEach(repo => {
+            userContent += `<a href="${repo.html_url}" target="_blank">${repo.name}</a>`
+        })
+        userContent += `</section>`
+
+    }
+
+    usercard.innerHTML = userContent
+
+}
 
 //Funcion para gestionar Errores
 function showError(error) {
-
+    const errorContent = `<h1 class="error">Error 🐱‍👤 ${error}</h1>`
+    usercard.innerHTML = errorContent
 }
